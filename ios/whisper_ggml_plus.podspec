@@ -11,9 +11,8 @@ Whisper.cpp Flutter plugin with Large-v3-Turbo (128-mel) support.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*.{cpp,c,h,hpp,m,mm}'
   s.requires_arc = ['Classes/whisper/src/coreml/*.{m,mm}']
-  # Exclude architecture-specific implementations that are not used on Apple ARM targets
+  # ARM and x86 sources guard their implementations by target architecture.
   s.exclude_files = '**/*.metal',
-                    'Classes/whisper/ggml/src/ggml-cpu/arch/x86/**/*',
                     'Classes/whisper/ggml/src/ggml-cpu/arch/powerpc/**/*',
                     'Classes/whisper/ggml/src/ggml-cpu/arch/loongarch/**/*',
                     'Classes/whisper/ggml/src/ggml-cpu/arch/riscv/**/*',
