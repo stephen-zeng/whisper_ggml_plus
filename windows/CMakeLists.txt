@@ -27,6 +27,12 @@ set(WHISPER_OPENVINO OFF CACHE BOOL "Disable OpenVINO on Windows" FORCE)
 set(WHISPER_ALL_WARNINGS OFF CACHE BOOL "Use default warnings" FORCE)
 set(GGML_ALL_WARNINGS OFF CACHE BOOL "Use default warnings" FORCE)
 
+# whisper_ggml_plus.cpp holds UTF-8 string literals; without /utf-8 MSVC reads
+# them in the active code page and warns (or mis-compiles) on a non-936 host.
+if(MSVC)
+  add_compile_options(/utf-8)
+endif()
+
 add_compile_definitions(
   WHISPER_VERSION=\"1.8.3\"
   GGML_USE_CPU

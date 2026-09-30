@@ -258,7 +258,10 @@ function(ggml_add_backend_library backend)
     else()
         add_library(${backend} ${ARGN})
         target_link_libraries(ggml PUBLIC ${backend})
-        install(TARGETS ${backend} LIBRARY)
+        # See the note on the install guards in ../CMakeLists.txt.
+        if (NOT WIN32)
+            install(TARGETS ${backend} LIBRARY)
+        endif()
     endif()
 
     target_link_libraries(${backend} PRIVATE ggml-base)

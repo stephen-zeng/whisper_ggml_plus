@@ -330,16 +330,27 @@ set_target_properties(ggml PROPERTIES PUBLIC_HEADER "${GGML_PUBLIC_HEADERS}")
 #if (GGML_METAL)
 #    set_target_properties(ggml PROPERTIES RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src/ggml-metal.metal")
 #endif()
-install(TARGETS ggml LIBRARY PUBLIC_HEADER)
-install(TARGETS ggml-base LIBRARY)
+# Skipped on Windows because this project is consumed as a Flutter plugin, whose
+# host sets CMAKE_INSTALL_PREFIX to $<TARGET_FILE_DIR:...>. That generator
+# expression is only evaluable where the runner target is visible, so a relative
+# destination here is written into cmake_install.cmake literally and the INSTALL
+# step fails with "file cannot create directory .../$<TARGET_FILE_DIR:...>/lib".
+# Nothing these rules install is shipped anyway: the plugin links ggml and
+# whisper statically and exports only whisper_ggml_plus.dll.
+if(NOT WIN32)
+    install(TARGETS ggml LIBRARY PUBLIC_HEADER)
+    install(TARGETS ggml-base LIBRARY)
+endif()
 
 if (GGML_STANDALONE)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ggml.pc.in
         ${CMAKE_CURRENT_BINARY_DIR}/ggml.pc
         @ONLY)
 
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ggml.pc
-        DESTINATION share/pkgconfig)
+    if(NOT WIN32)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ggml.pc
+            DESTINATION share/pkgconfig)
+    endif()
 endif()
 
 #
@@ -399,9 +410,11 @@ target_compile_definitions(ggml-base PRIVATE
 message(STATUS "ggml version: ${GGML_INSTALL_VERSION}")
 message(STATUS "ggml commit:  ${GGML_BUILD_COMMIT}")
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ggml-config.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/ggml-version.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ggml)
+if(NOT WIN32)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ggml-config.cmake
+                  ${CMAKE_CURRENT_BINARY_DIR}/ggml-version.cmake
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ggml)
+endif()
 
 if (MSVC)
     set(MSVC_WARNING_FLAGS
